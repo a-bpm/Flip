@@ -1,4 +1,4 @@
-main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
+main.o: /mnt/c/Projects/gba/flip/src/main.cpp \
  /mnt/c/butano/butano/include/bn_core.h \
  /mnt/c/butano/butano/include/bn_span.h \
  /mnt/c/butano/butano/include/bn_array.h \
@@ -36,6 +36,9 @@ main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
  /mnt/c/butano/butano/include/bn_sprite_palette_item.h \
  /mnt/c/butano/butano/include/bn_color.h \
  /mnt/c/butano/butano/include/bn_sprite_ptr.h \
+ /mnt/c/butano/butano/include/bn_sprite_palettes.h \
+ /mnt/c/butano/butano/include/bn_config_log.h \
+ /mnt/c/butano/butano/include/bn_log_backend.h \
  /mnt/c/butano/butano/include/bn_sprite_builder.h \
  /mnt/c/butano/butano/include/bn_camera_ptr.h \
  /mnt/c/butano/butano/include/bn_sprite_item.h \
@@ -45,7 +48,7 @@ main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
  /mnt/c/butano/butano/include/bn_sprite_palette_ptr.h \
  /mnt/c/butano/butano/include/bn_sprite_affine_mat_ptr.h \
  /mnt/c/butano/butano/include/bn_sprite_double_size_mode.h \
- /mnt/c/Projects/gba/Flip/build/bn_sprite_items_shapecons.h \
+ /mnt/c/Projects/gba/flip/build/bn_sprite_items_shapecons.h \
  /mnt/c/butano/butano/include/bn_regular_bg_item.h \
  /mnt/c/butano/butano/include/bn_bg_palette_item.h \
  /mnt/c/butano/butano/include/bn_regular_bg_map_item.h \
@@ -53,7 +56,13 @@ main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
  /mnt/c/butano/butano/include/bn_regular_bg_map_cell.h \
  /mnt/c/butano/butano/include/bn_regular_bg_tiles_item.h \
  /mnt/c/butano/butano/include/bn_regular_bg_ptr.h \
- /mnt/c/Projects/gba/Flip/build/bn_regular_bg_items_title.h
+ /mnt/c/Projects/gba/flip/build/bn_regular_bg_items_title.h \
+ /mnt/c/Projects/gba/flip/build/bn_regular_bg_items_press_start.h \
+ /mnt/c/butano/butano/include/bn_bg_palettes.h \
+ /mnt/c/Projects/gba/flip/build/bn_sound_items.h \
+ /mnt/c/butano/butano/include/bn_sound_item.h \
+ /mnt/c/butano/butano/include/bn_fixed.h \
+ /mnt/c/butano/butano/include/bn_color.h
 /mnt/c/butano/butano/include/bn_core.h:
 /mnt/c/butano/butano/include/bn_span.h:
 /mnt/c/butano/butano/include/bn_array.h:
@@ -91,6 +100,9 @@ main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
 /mnt/c/butano/butano/include/bn_sprite_palette_item.h:
 /mnt/c/butano/butano/include/bn_color.h:
 /mnt/c/butano/butano/include/bn_sprite_ptr.h:
+/mnt/c/butano/butano/include/bn_sprite_palettes.h:
+/mnt/c/butano/butano/include/bn_config_log.h:
+/mnt/c/butano/butano/include/bn_log_backend.h:
 /mnt/c/butano/butano/include/bn_sprite_builder.h:
 /mnt/c/butano/butano/include/bn_camera_ptr.h:
 /mnt/c/butano/butano/include/bn_sprite_item.h:
@@ -100,7 +112,7 @@ main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
 /mnt/c/butano/butano/include/bn_sprite_palette_ptr.h:
 /mnt/c/butano/butano/include/bn_sprite_affine_mat_ptr.h:
 /mnt/c/butano/butano/include/bn_sprite_double_size_mode.h:
-/mnt/c/Projects/gba/Flip/build/bn_sprite_items_shapecons.h:
+/mnt/c/Projects/gba/flip/build/bn_sprite_items_shapecons.h:
 /mnt/c/butano/butano/include/bn_regular_bg_item.h:
 /mnt/c/butano/butano/include/bn_bg_palette_item.h:
 /mnt/c/butano/butano/include/bn_regular_bg_map_item.h:
@@ -108,4 +120,10 @@ main.o: /mnt/c/Projects/gba/Flip/src/main.cpp \
 /mnt/c/butano/butano/include/bn_regular_bg_map_cell.h:
 /mnt/c/butano/butano/include/bn_regular_bg_tiles_item.h:
 /mnt/c/butano/butano/include/bn_regular_bg_ptr.h:
-/mnt/c/Projects/gba/Flip/build/bn_regular_bg_items_title.h:
+/mnt/c/Projects/gba/flip/build/bn_regular_bg_items_title.h:
+/mnt/c/Projects/gba/flip/build/bn_regular_bg_items_press_start.h:
+/mnt/c/butano/butano/include/bn_bg_palettes.h:
+/mnt/c/Projects/gba/flip/build/bn_sound_items.h:
+/mnt/c/butano/butano/include/bn_sound_item.h:
+/mnt/c/butano/butano/include/bn_fixed.h:
+/mnt/c/butano/butano/include/bn_color.h:
