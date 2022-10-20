@@ -1,4 +1,7 @@
+/build
 *.gba
 *.elf
 *.sav
 *.swp
+*.o
+*.b
