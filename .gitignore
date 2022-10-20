@@ -2,3 +2,5 @@
 *.elf
 *.sav
 *.swp
+*.o
+*.b
