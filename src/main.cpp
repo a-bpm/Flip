@@ -1,3 +1,8 @@
+/*
+Written by me, Andrew, as my first step into game development and as a 
+C++ programming exercise
+*/
+
 #include "bn_core.h"
 #include <bn_keypad.h>
 #include <bn_optional.h>
@@ -9,6 +14,7 @@
 #include "bn_sprite_items_shapecons.h"
 #include "bn_sprite_items_dice.h"
 #include "bn_sprite_items_pointer.h"
+#include "bn_sprite_text_generator.h"
 
 #include <bn_regular_bg_item.h>
 #include <bn_regular_bg_ptr.h>
@@ -22,6 +28,9 @@
 #include <bn_color.h>
 #include <bn_random.h>
 
+#include "common_variable_8x16_sprite_font.h"
+
+// sprite orientation
 enum directions {
     UP = 0,
     RIGHT = 1,
@@ -29,34 +38,49 @@ enum directions {
     LEFT = 3
 };
 
-// Struct defs
+// class defs
 class DiceSprite {
     bn::optional<bn::sprite_ptr> dice_sprite;
     int spriteState;
-
+    unsigned int salt = 0;
     public:
         DiceSprite(int initState, int x, int y)
         {
             dice_sprite = bn::sprite_items::dice.create_sprite(x, y);
-
+            salt = 0;
             spriteState = initState;
         }
 
-        int shuffleDice(unsigned int& salt)
+        unsigned int getSalt()
+        {
+            return this->salt;
+        }
+
+        void addSalt(unsigned int input)
+        {
+            this->salt += input;
+        }
+
+        void setSalt(unsigned int input)
+        {
+            this->salt = input;
+        }
+
+        int shuffleDice()
         {
             int finalNum = 0;
             bn::random faceSelector;
-            for(int i = 0; i < salt; i++)
+            for (unsigned int i = 0; i < salt; i++)
             {
-                faceSelector.get();
+                faceSelector.update();
             }
 
-            for(int i = 0; i < 25; i++)
+            for (int i = 0; i < 25; i++)
             {
                 int selectedFace = faceSelector.get_int(6);
                 dice_sprite->set_tiles(bn::sprite_items::dice.tiles_item().create_tiles(selectedFace));
                 
-                for(int j = 0; j < 7; j++)
+                for (int j = 0; j < 7; j++)
                 {
                     bn::core::update();
                     if (bn::keypad::any_pressed())
@@ -65,7 +89,7 @@ class DiceSprite {
                     }
                 }
                 
-                if(i == 24)
+                if (i == 24)
                 {
                     finalNum = selectedFace;
                 }
@@ -75,7 +99,8 @@ class DiceSprite {
 };
 
 // Function declarations
-bool checkStartScreenState(bn::sprite_ptr& sprite, int& spriteState, int& frameCounter);
+bool check_start_screen(bn::sprite_ptr& sprite, int& spriteState, int& frameCounter);
+bool still_waiting();
 void fade_all_bg_and_sprite();
 void unfade_all_bg_and_sprite();
 void fade_all_sprite();
@@ -89,77 +114,73 @@ int main()
     bn::core::init();
     bn::sound_items::start_up.play(0.5);
 
-    unsigned int rngSalt = 0;
     int spriteState = 1;
     bool startScreen = true;
     int frameCounter = 0;
-    // start menu section
-    if(startScreen)
+
+    // start screen start
+    if (startScreen)
     {
         bn::sprite_ptr shape = bn::sprite_items::shapecons.create_sprite(0, -30);
         bn::regular_bg_ptr title_screen = bn::regular_bg_items::title.create_bg(-12, -24);
         bn::regular_bg_ptr press_start = bn::regular_bg_items::press_start.create_bg(0, 16);
         do
         {
-            if (bn::keypad::any_pressed())
-            {
-                rngSalt++;
-            }
-            startScreen = checkStartScreenState(shape, spriteState, frameCounter);
-            if(frameCounter == 40)
+            startScreen = check_start_screen(shape, spriteState, frameCounter);
+            if (frameCounter == 40)
             {
                 press_start.set_visible(! press_start.visible());
             }
-            else if(frameCounter == 50)
+            else if (frameCounter == 50)
             {
                 press_start.set_visible(press_start.visible());
             }
 
-            if(!startScreen)
+            if (!startScreen)
             {
                 fade_all_bg_and_sprite();
                 shape.set_tiles(bn::sprite_items::shapecons.tiles_item().create_tiles(0));
             }
         }
-        while(startScreen);
+        while (startScreen);
     }
 
     unfade_all_bg_and_sprite();
-    // game selection menu?
 
+    bool coinGameRunning = true;
+    if (coinGameRunning)
+    {
+
+    }
     // dice game start
     bool diceGameRunning = true;
 
-    if(diceGameRunning)
+    if (diceGameRunning)
     {
         bn::regular_bg_ptr title_screen = bn::regular_bg_items::title.create_bg(-12, -24);
         bool waitingForRoll = true;
         while(waitingForRoll)
         {
-            // Select roll
-            if(bn::keypad::a_pressed())
-            {
-                waitingForRoll = false;
-            }
-            bn::core::update();
+            // Press a to start
+            waitingForRoll = still_waiting();
         }
 
-        bool diceOver = true;
-        while(diceOver)
+        bool playingDice = true;
+        while(playingDice) //
         {
-            if (bn::keypad::any_pressed())
-            {
-                rngSalt++;
-            }
-
             DiceSprite playerDiceControl = DiceSprite(0, -60, 0);
             DiceSprite enemyDiceControl = DiceSprite(0, 60, 0);
 
+            if (bn::keypad::any_pressed())
+            {
+                playerDiceControl.addSalt(3);
+                enemyDiceControl.addSalt(5);
+            }
+
             bn::sprite_ptr pointerSprite = bn::sprite_items::pointer.create_sprite(-85, 0);
             pointerSprite.set_tiles(bn::sprite_items::pointer.tiles_item().create_tiles(RIGHT));
-            int playerRoll = playerDiceControl.shuffleDice(rngSalt);
-            rngSalt = rngSalt >> 2;
-            int enemyRoll = enemyDiceControl.shuffleDice(rngSalt);
+            int playerRoll = playerDiceControl.shuffleDice();
+            int enemyRoll = enemyDiceControl.shuffleDice();
 
             for (int i = 0; i < 30; i++)
             {
@@ -168,17 +189,18 @@ int main()
 
             if (playerRoll < enemyRoll) // lose
             {
+                // Lost! Retry? [Yes, Yes!!]
 
-                diceOver = false;
+                playingDice = false;
             }
             else if (playerRoll > enemyRoll) // win
             {
-
-                diceOver = false;
+                // Win! Move on?
+                playingDice = false;
             }
             else if (playerRoll == enemyRoll) // draw
             {
-                // Draw! display
+                // Draw! display, confirm reroll
             }
         }
     }
@@ -191,7 +213,7 @@ int main()
 
 // Function definitions
 
-bool checkStartScreenState(bn::sprite_ptr& sprite, int& spriteState, int& frameCounter)
+bool check_start_screen(bn::sprite_ptr& sprite, int& spriteState, int& frameCounter)
 {
     bool startScreen = true;
 
@@ -254,9 +276,9 @@ bool checkStartScreenState(bn::sprite_ptr& sprite, int& spriteState, int& frameC
 void fade_all_bg_and_sprite()
 {
     bn::fixed fader = 0.1;
-    for(int j = 0; j < 10; j++)
+    for (int j = 0; j < 10; j++)
     {
-        for(int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
             bn::core::update();
         }
@@ -277,9 +299,9 @@ void fade_all_bg_and_sprite()
 void unfade_all_bg_and_sprite()
 {
     bn::fixed fader = 0.9;
-    for(int j = 0; j < 10; j++)
+    for (int j = 0; j < 10; j++)
     {
-        for(int i = 0; i < 5; i++)
+        for (int i = 0; i < 5; i++)
         {
             bn::core::update();
         }
@@ -302,4 +324,16 @@ void reveal_all_bg_and_sprite()
     bn::bg_palettes::set_fade_intensity(0);
     bn::sprite_palettes::set_fade_intensity(0);
     bn::core::update();
+}
+
+bool still_waiting()
+{
+    bn::sprite_text_generator text_generator(common::variable_8x16_sprite_font);
+    bool waiting = true;
+    if (bn::keypad::a_pressed())
+    {
+        waiting = false;
+    }
+    bn::core::update();
+    return waiting;
 }
