@@ -165,6 +165,7 @@ int main()
     if (coinGameRunning)
     {
 
+
         unfade_all_bg_and_sprite();
     }
 
