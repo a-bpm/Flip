@@ -36,6 +36,8 @@
 #include <bn_color.h>
 #include <bn_random.h>
 
+#include <algorithm>
+
 #include "../include/common_info.h"
 #include "../include/common_stats.h"
 #include "../include/common_variable_8x16_sprite_font.h"
@@ -49,6 +51,8 @@ enum directions {
     LEFT = 3,
     BLANK = 4
 };
+
+const int CARD_SPACING = 52;
 
 // class defs
 class Game {
@@ -65,7 +69,7 @@ class Game {
             gameSprite = sprite.create_sprite(x, y);
         }
 
-        Game(unsigned int seed)
+        Game(int seed)
         {
             salt = seed;
         }
@@ -103,11 +107,13 @@ class CardGame: public Game {
     public:
         using Game::Game;
         bn::vector<bn::sprite_ptr, 4> cards;
+        
 
-        CardGame(int targetShape)
-        : Game(targetShape)
+        CardGame(int target, bn::sprite_item sprite, int seed)
+        : Game(seed)
         {
-            spriteState = targetShape;
+            gameSprite = sprite.create_sprite(0, 60);
+            gameSprite.value().set_tiles(bn::sprite_items::shapecons.tiles_item().create_tiles(target));
         }
 
         void add_cards(bn::sprite_ptr addMe)
@@ -150,18 +156,155 @@ class CardGame: public Game {
         /* 0 = showing
          * 1 = hidden
          */
-        void flip_cards(int flipTo)
+        void flip_cards(int flipTo, char order[])
         {
-            cards.at(0).set_tiles(bn::sprite_items::circle_card.tiles_item().create_tiles(flipTo));
-            cards.at(1).set_tiles(bn::sprite_items::square_card.tiles_item().create_tiles(flipTo));
-            cards.at(2).set_tiles(bn::sprite_items::triangle_card.tiles_item().create_tiles(flipTo));
-            cards.at(3).set_tiles(bn::sprite_items::diamond_card.tiles_item().create_tiles(flipTo));
+            for (int i = 0; i < 4; i++)
+            {
+                switch(order[i])
+                {
+                    case 'c':
+                        cards.at(i).set_tiles(bn::sprite_items::circle_card.tiles_item().create_tiles(flipTo));
+                        break;
+
+                    case 's':
+                        cards.at(i).set_tiles(bn::sprite_items::square_card.tiles_item().create_tiles(flipTo));
+                        break;
+
+                    case 't':
+                        cards.at(i).set_tiles(bn::sprite_items::triangle_card.tiles_item().create_tiles(flipTo));
+                        break;
+
+                    case 'd':
+                        cards.at(i).set_tiles(bn::sprite_items::diamond_card.tiles_item().create_tiles(flipTo));
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
-        void shuffle_cards()
+        void shuffle_cards(int& targetShape, char order[])
         {
-             
+            int swaps = 0;
+            bn::random cardDecider;
+            for (unsigned int i = 0; i < salt; i++)
+            {
+                cardDecider.update();
+            }
+
+            for (unsigned int i = 0; i < salt; i++)
+            {
+                if (swaps > 3)
+                {
+                    swaps = 0;
+                }
+                swaps++;
+
+                int rng1 = cardDecider.get_int(100);
+                cardDecider.update();
+                int rng2 = cardDecider.get_int(100);
+                cardDecider.update();
+    
+                if (rng1 < rng2)
+                {
+                    switch(swaps)
+                    {
+                        case 0:
+                            if (targetShape == swaps)
+                            {
+                                targetShape = 1;
+                            }
+                            else if (targetShape == 1)
+                            {
+                                targetShape = swaps;
+                            }
+
+                            bn::swap(cards[swaps], cards[1]);
+                            std::swap(order[swaps], order[1]);
+    
+                            break;
+
+                        case 1:
+                            if (targetShape == swaps)
+                            {
+                                targetShape = 2;
+                            }
+                            else if (targetShape == 2)
+                            {
+                                targetShape = swaps;
+                            }
+
+                            bn::swap(cards[swaps], cards[2]);
+                            std::swap(order[swaps], order[2]);
+
+                            break;
+
+                        case 2:
+                            if (targetShape == swaps)
+                            {
+                                targetShape = 3;
+                            }
+                            else if (targetShape == 3)
+                            {
+                                targetShape = swaps;
+                            }
+
+                            bn::swap(cards[swaps], cards[3]);
+                            std::swap(order[swaps], order[3]);
+
+                            break;
+
+                        case 3:
+                            if (targetShape == swaps)
+                            {
+                                targetShape = 0;
+                            }
+                            else if (targetShape == 0)
+                            {
+                                targetShape = swaps;
+                            }
+
+                            bn::swap(cards[swaps], cards[0]);
+                            std::swap(order[swaps], order[0]);
+
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+            addSalt();
+            bn::core::update();
         } 
+
+        bool select_card(int startingPos, int target)
+        {
+            bool winner = false;
+            bn::sprite_ptr pointerPtr = bn::sprite_items::pointer.create_sprite(startingPos, 21);
+            int cursorSelection = 0;
+            while (!bn::keypad::a_pressed())
+            {
+                if(bn::keypad::right_pressed() && cursorSelection < 3) // move right if not at rightmost
+                {
+                    cursorSelection++;
+                    pointerPtr.set_x(pointerPtr.x() + CARD_SPACING);
+                }
+
+                if(bn::keypad::left_pressed() && cursorSelection > 0) // move left if not at leftmost
+                {
+                    cursorSelection--;
+                    pointerPtr.set_x(pointerPtr.x() - CARD_SPACING);
+                }
+                bn::core::update();
+            }
+
+            if (cursorSelection == target)
+            {
+                winner = true;
+            }
+
+            return winner;
+        }
 
         void spread_cards(int outerPos, int innerPos)
         {
@@ -238,6 +381,7 @@ class DiceGame: public Game {
 
 // Function declarations
 void wait_for_x(int x);
+void display_for_x(bn::istring displayText, int x);
 bool check_start_screen(bn::sprite_ptr& sprite, int& spriteState, int& frameCounter);
 bool wait_for_confirm(bn::istring);
 void fade_all_bg_and_sprite();
@@ -253,8 +397,8 @@ int main()
     bn::core::init();
     bn::sound_items::start_up.play(0.5);
 
-    int spriteState = 1;
-    bool startScreen = false; // set to false to skip start screen
+    int targetShape = 0;
+    bool startScreen = true; // set to false to skip start screen
     int frameCounter = 0;
     unsigned int seed = 0;
 
@@ -266,8 +410,8 @@ int main()
         bn::regular_bg_ptr press_start = bn::regular_bg_items::press_start.create_bg(0, 16);
         do
         {
-            startScreen = check_start_screen(shape, spriteState, frameCounter);
-            seed += 1;
+            startScreen = check_start_screen(shape, targetShape, frameCounter);
+            seed++;
             if (frameCounter == 40)
             {
                 seed += 2;
@@ -299,11 +443,10 @@ int main()
 
     fade_all_bg_and_sprite();
     // dice game start
-    bool diceGameRunning = false; // set to false to skip game
+    bool diceGameRunning = true; // set to false to skip game
     bool drawFlag = false;
     if (diceGameRunning)
     {
-        bn::regular_bg_ptr title_screen = bn::regular_bg_items::title.create_bg(-12, -24);
         unfade_all_bg_and_sprite();
 
         bool playingDice = true;
@@ -370,12 +513,9 @@ int main()
 
     //card game start
     fade_all_bg_and_sprite();
-    bool cardGameRunning = true;
-    bool retry = true;
+    bool cardGameRunning = true; // set to false to skip card game
     if (cardGameRunning)
     {
-        // 0 is the target shape based off shape.bmp
-        CardGame cardSelector(0);
         int circPos, sqPos, triPos, diaPos;
         circPos = -78;
         sqPos = -26;
@@ -384,14 +524,14 @@ int main()
 
         unfade_all_bg_and_sprite();
 
+        bn::string<50> displayText = "Press A to start the card game!";
+
         bool playingCards = true;
         while (playingCards) 
         {
-            bn::string<50> displayText = "Press A to start the card game!";
-            if(retry)
-            {
-                wait_for_confirm(displayText);
-            }
+            wait_for_confirm(displayText);
+            CardGame cardSelector(targetShape, bn::sprite_items::shapecons, seed);
+
             cardSelector.empty_cards(); 
             bn::sprite_ptr circlePtr = bn::sprite_items::circle_card.create_sprite(circPos, -20);
             bn::sprite_ptr squarePtr = bn::sprite_items::square_card.create_sprite(sqPos, -20);
@@ -402,19 +542,33 @@ int main()
             cardSelector.add_cards(trianglePtr); 
             cardSelector.add_cards(diamondPtr); 
 
+            char cardOrder[] = { 'c', 's', 't', 'd' };
+
+            wait_for_x(60);
             cardSelector.stack_cards();
-            cardSelector.flip_cards(1);
-            cardSelector.shuffle_cards();
+            cardSelector.flip_cards(1, cardOrder);
+
+            wait_for_x(60);
+            cardSelector.shuffle_cards(targetShape, cardOrder);
             cardSelector.spread_cards(circPos, sqPos);
 
-            bn::sprite_ptr pointerPtr = bn::sprite_items::pointer.create_sprite(circPos, 21);
+            playingCards = !(cardSelector.select_card(circPos, targetShape));
+
+            if(playingCards)
+            {
+                displayText = "Press A to retry!";
+            }
+
+            cardSelector.flip_cards(0, cardOrder);
             wait_for_x(120);
-
-            // TODO: Define goal shape, shuffle card function, pointer position movement
-            // cardSelector.flip_cards(0);
-
         }
 
+    }
+
+    while(true)
+    {
+        bn::string<50> displayText = "You win!";
+        wait_for_confirm(displayText);
     }
 }
 
@@ -451,8 +605,8 @@ bool check_start_screen(bn::sprite_ptr& sprite, int& spriteState, int& frameCoun
             bn::sound_items::blop.play(0.5);
         }
 
-        spriteState += 1;
-        if (spriteState > 3)
+        spriteState++;
+        if (spriteState > LEFT)
         {
             spriteState = UP;
         }
@@ -560,4 +714,18 @@ bool wait_for_confirm(bn::istring displayText)
         bn::core::update();
     }
     return waiting;
+}
+
+void display_for_x(bn::istring displayText, int x)
+{
+    bn::sprite_text_generator text_generator(common::variable_8x16_sprite_font);
+    bn::vector<bn::sprite_ptr, 32> text_sprites;
+    text_generator.set_bg_priority(0);
+    text_generator.set_center_alignment();
+    text_generator.generate(0, 20, displayText, text_sprites);
+
+    for (int i = 0; i < x; i++)
+    {
+        bn::core::update();
+    }
 }
