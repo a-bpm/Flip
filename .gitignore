@@ -1,4 +1,5 @@
 /build
+/dmg_audio
 *.gba
 *.elf
 *.sav
@@ -6,5 +7,7 @@
 *.o
 *.b
 *.txt
+*.ss*
+*.json
 .vscode
 .DS_Store

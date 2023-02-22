@@ -1,8 +1,0 @@
--I
-/Users/abryan/butano/butano/include
-/Users/abryan/butano/common/include
-/mnt/c/butano/butano/include
-/mnt/c/butano/common/include
-build/
-include/
--std=c++20
