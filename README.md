@@ -1,6 +1,7 @@
 # Flip
 
 Simple GBA game developed using [Butano](https://github.com/GValiente/butano) engine.
+
 ![Title](images/Title.gif)
 
 Features 3 minigames:
